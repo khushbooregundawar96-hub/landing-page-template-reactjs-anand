@@ -1,6 +1,6 @@
 # Landing Page Template com React JS e Material UI :dart:
 
-Site: https://hbsales.onrender.com/
+Site: https://d3b6h7qbjflfnf.cloudfront.net/
 
 ![link Home do site](https://raw.githubusercontent.com/alessandradocouto/landing-page-template-reactjs/master/src/assets/Home.png)
 
