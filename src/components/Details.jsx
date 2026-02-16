@@ -29,7 +29,7 @@ const Details = () => {
       ]);
 
       if (error) {
-        console.error(error);
+        console.error("Supabase error:", error);
         setMessageType("error");
         setMessage(error.message || "Error submitting form");
       } else {
@@ -38,9 +38,9 @@ const Details = () => {
         event.currentTarget.reset();
       }
     } catch (err) {
-      console.error(err);
+      console.error("Catch error:", err);
       setMessageType("error");
-      setMessage("Unexpected error");
+      setMessage(err.message || "Connection error - please try again");
     } finally {
       setLoading(false);
     }
