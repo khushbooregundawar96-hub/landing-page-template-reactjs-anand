@@ -48,22 +48,24 @@ app.post("/api/contacts", async (req, res) => {
   try {
     console.log("Incoming body:", req.body);
 
-    const { email, phone } = req.body;
+    const { email, mobile } = req.body;
 
-    if (!email || !phone) {
+    // Validation
+    if (!email || !mobile) {
       return res.status(400).json({
         success: false,
-        error: "Email and phone are required"
+        error: "Email and mobile are required"
       });
     }
 
+    // Insert into correct table
     const { data, error } = await supabase
-      .from("contacts")
-      .insert([{ email, phone }])
+      .from("landingpage")
+      .insert([{ email, mobile }])
       .select();
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("Supabase insert error:", error);
       return res.status(500).json({
         success: false,
         error: error.message
@@ -75,11 +77,12 @@ app.post("/api/contacts", async (req, res) => {
       message: "Contact saved successfully",
       data: data[0]
     });
+
   } catch (err) {
-    console.error("FULL ERROR:", err);
+    console.error("Server error:", err);
     res.status(500).json({
       success: false,
-      error: err.message || "Server error"
+      error: err.message || "Internal server error"
     });
   }
 });
@@ -88,7 +91,7 @@ app.post("/api/contacts", async (req, res) => {
 app.get("/api/contacts", async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from("contacts")
+      .from("landingpage")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -98,6 +101,7 @@ app.get("/api/contacts", async (req, res) => {
       success: true,
       data
     });
+
   } catch (err) {
     console.error("Fetch error:", err);
     res.status(500).json({
