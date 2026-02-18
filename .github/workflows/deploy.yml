@@ -3,7 +3,7 @@ name: Deploy React App to AWS
 on:
   push:
     branches:
-      - master
+      - master   # make sure your default branch is really 'master'
 
 jobs:
   build-and-deploy:
@@ -19,14 +19,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # 4️⃣ Build React app
       - name: Build project
         run: npm run build
+        env:
+          CI: false
 
       # 5️⃣ Configure AWS credentials
       - name: Configure AWS credentials
@@ -44,6 +47,10 @@ jobs:
       # 7️⃣ Invalidate CloudFront cache
       - name: Invalidate CloudFront
         run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
           aws cloudfront create-invalidation \
           --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
           --paths "/*"
