@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Button, Stack, TextField, Alert } from "@mui/material";
 import Title from "./Title";
 import Paragraph from "./Paragraph";
-import { supabase } from "../utils/supabase";
+import { submitContact } from "../utils/api";
 
 const Details = () => {
   const [loading, setLoading] = useState(false);
@@ -21,28 +21,21 @@ const Details = () => {
       const email = data.get("email");
       const phone = data.get("phone");
 
-      // Insert directly into Supabase
-      const { error } = await supabase.from("contacts").insert([
-        {
-          email,
-          phone,
-        },
-      ]);
+      // Call backend API to insert data
+      const result = await submitContact({ email, phone });
 
-      if (error) {
-        console.error("Supabase error:", error);
-        setMessageType("error");
-        setMessage(error.message || "Error submitting form");
-      } else {
+      if (result.success) {
         setMessageType("success");
-        setMessage("Submitted successfully ");
+        setMessage(result.message || "Submitted successfully");
         form.reset();
+      } else {
+        setMessageType("error");
+        setMessage(result.error || "Error submitting form");
       }
     } catch (err) {
-      console.error("Catch error:", err);
-      setMessageType("success");
-      setMessage("Submitted successfully");
-      form.reset();
+      console.error("Error:", err);
+      setMessageType("error");
+      setMessage(err.message || "Error submitting form");
     } finally {
       setLoading(false);
     }

@@ -48,20 +48,20 @@ app.post("/api/contacts", async (req, res) => {
   try {
     console.log("Incoming body:", req.body);
 
-    const { email, mobile } = req.body;
+    const { email, phone } = req.body;
 
     // Validation
-    if (!email || !mobile) {
+    if (!email || !phone) {
       return res.status(400).json({
         success: false,
-        error: "Email and mobile are required"
+        error: "Email and phone are required"
       });
     }
 
-    // Insert into correct table
+    // Insert into landingpage table
     const { data, error } = await supabase
       .from("landingpage")
-      .insert([{ email, mobile }])
+      .insert([{ email, mobile: phone }])
       .select();
 
     if (error) {
