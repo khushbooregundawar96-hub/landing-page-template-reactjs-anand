@@ -1,4 +1,9 @@
-const API_URL = 'http://localhost:5002/api';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const submitContact = async (contactData) => {
   try {
@@ -8,26 +13,20 @@ export const submitContact = async (contactData) => {
       throw new Error('Email and phone are required');
     }
 
-    // Use backend API instead of Supabase
-    const response = await fetch(`${API_URL}/contacts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, phone }),
-    });
+    const { data, error } = await supabase
+      .from('landingpage')   // ✅ your correct table name
+      .insert([{ email, phone }]);
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to submit contact');
+    if (error) {
+      throw error;
     }
 
     return {
       success: true,
-      data: result.data,
-      message: result.message,
+      data,
+      message: 'Contact submitted successfully',
     };
+
   } catch (error) {
     console.error('Error submitting contact:', error);
     return {
