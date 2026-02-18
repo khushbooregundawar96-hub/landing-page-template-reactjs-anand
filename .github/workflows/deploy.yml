@@ -1,4 +1,4 @@
-name: Deploy React App to AWS
+name: Deploy to S3
 
 on:
   push:
@@ -6,29 +6,30 @@ on:
       - master
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
+    env:
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      # 4️⃣ Build React app
       - name: Build project
         run: npm run build
+        env:
+          CI: false
 
-      # 5️⃣ Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -36,14 +37,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 6️⃣ Upload build files to S3
       - name: Deploy to S3
         run: |
-          aws s3 sync build/ s3://${{ secrets.S3_BUCKET }} --delete
+          if [ -z "$S3_BUCKET_NAME" ]; then
+            echo "S3_BUCKET_NAME secret is missing"
+            exit 1
+          fi
 
-      # 7️⃣ Invalidate CloudFront cache
-      - name: Invalidate CloudFront
-        run: |
-          aws cloudfront create-invalidation \
-          --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-          --paths "/*"
+          echo "Deploying to S3 bucket: $S3_BUCKET_NAME"
+          aws s3 sync build/ s3://$S3_BUCKET_NAME --delete
