@@ -34,7 +34,7 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          if [ -z "$S3_BUCKET" ]; then
+          if [ -z "$S3_BUCKET_NAME" ]; then
             echo "S3_BUCKET secret is missing"
             exit 1
           fi
